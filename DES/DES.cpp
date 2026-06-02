@@ -77,31 +77,31 @@ uint64_t DES::encrypt(uint64_t plaintext, vector<uint64_t> roundKeys){
     // This function should take a 64-bit plaintext and a vector of round keys,
     // and return the 64-bit ciphertext after applying the initial permutation, 16 rounds of processing, and final permutation.
     // For simplicity, this is a placeholder implementation. You will need to implement the actual logic.
-    cout << "Initial plaintext: 0x" << hex << setw(16) << setfill('0') << uppercase << plaintext << endl;
-    printBinary(plaintext, 64);
+    // cout << "Initial plaintext: 0x" << hex << setw(16) << setfill('0') << uppercase << plaintext << endl;
+    // printBinary(plaintext, 64);
 
     uint64_t permutedText = initialPermutation(plaintext);
 
-    cout << "After initial permutation: 0x" << hex << setw(16) << setfill('0') << uppercase << permutedText << endl;
-    printBinary(permutedText, 64);
+    // cout << "After initial permutation: 0x" << hex << setw(16) << setfill('0') << uppercase << permutedText << endl;
+    // printBinary(permutedText, 64);
 
     uint32_t leftHalf = (permutedText >> 32) & 0xFFFFFFFF; // Left 32 bits
     uint32_t rightHalf = permutedText & 0xFFFFFFFF; // Right 32 bits
 
-    cout << "Initial Left Half: 0x" << hex << setw(8) << setfill('0') << uppercase << leftHalf 
-         << " | Initial Right Half: 0x" << hex << setw(8) << setfill('0') << uppercase << rightHalf << endl;
-        printBinary(leftHalf, 32);
-        printBinary(rightHalf, 32);
+    // cout << "Initial Left Half: 0x" << hex << setw(8) << setfill('0') << uppercase << leftHalf 
+    //      << " | Initial Right Half: 0x" << hex << setw(8) << setfill('0') << uppercase << rightHalf << endl;
+    //     printBinary(leftHalf, 32);
+    //     printBinary(rightHalf, 32);
     
     for (size_t i = 0;i < roundKeys.size();i++){
         uint32_t temp = rightHalf;
         rightHalf = leftHalf ^ feistelFunction(rightHalf, roundKeys[i]);
         leftHalf = temp;
 
-        cout << "After Round " << (i + 1) << ": Left Half: 0x" << hex << setw(8) << setfill('0') << uppercase << leftHalf 
-             << " | Right Half: 0x" << hex << setw(8) << setfill('0') << uppercase << rightHalf << endl;
-        printBinary(leftHalf, 32);
-        printBinary(rightHalf, 32); 
+        // cout << "After Round " << (i + 1) << ": Left Half: 0x" << hex << setw(8) << setfill('0') << uppercase << leftHalf 
+        //      << " | Right Half: 0x" << hex << setw(8) << setfill('0') << uppercase << rightHalf << endl;
+        // printBinary(leftHalf, 32);
+        // printBinary(rightHalf, 32); 
     }
     swap(leftHalf, rightHalf); // Swap halves after the final round
     uint64_t result = ((uint64_t)leftHalf << 32) | rightHalf;
