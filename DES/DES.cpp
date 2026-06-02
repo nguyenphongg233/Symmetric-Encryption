@@ -1,5 +1,5 @@
 #include "DES.h"
-
+#include "DES_table.h"
 using namespace std;
 
 #define DES_DEBUG 1
@@ -45,25 +45,30 @@ uint32_t DES::feistelFunction(uint32_t halfBlock, uint64_t roundKey){
     // and return a 32-bit output after applying the expansion, substitution, and permutation steps.
     // For simplicity, this is a placeholder implementation. You will need to implement the actual logic.
     
+    // cout << "Feistel function input half-block: 0x" << hex << setw(8) << setfill('0') << uppercase << halfBlock 
+    //      << " | Round Key: 0x" << hex << setw(12) << setfill('0') << uppercase << roundKey << endl;
+    // printBinary(halfBlock, 32);
+    // printBinary(roundKey, 48);
+    
     uint64_t expandedHalfBlock = ExpansionPermutation(halfBlock);
     uint64_t xored = expandedHalfBlock ^ roundKey; // 48-bit value
     uint32_t sBoxOutput = 0;
 
-        static int feistel_calls = 0;
-        bool doDebug = (feistel_calls == 0);
-        feistel_calls++;
-        for (int block = 0; block < 8; block++){
+    static int feistel_calls = 0;
+    bool doDebug = (feistel_calls == 0);
+    feistel_calls++;
+    for (int block = 0; block < 8; block++){
         uint8_t sixBits = (xored >> (42 - block * 6)) & 0x3F; // Extract 6 bits for the current block (MSB-first)
         uint8_t row = ((sixBits & 0x20) >> 4) | (sixBits & 0x01); // bits 6 and 1
         uint8_t col = (sixBits >> 1) & 0x0F;
         uint8_t sBoxValue = S_BOX[block][row][col];
-    #ifdef DES_DEBUG
-        if (doDebug) cout << "S-box " << (block+1) << ": six=0x" << hex << setw(2) << (int)sixBits << " row=" << dec << (int)row << " col=" << (int)col << " => 0x" << hex << (int)sBoxValue << endl;
-    #endif
         sBoxOutput = (sBoxOutput << 4) | (sBoxValue & 0x0F);
-        }
+    }
 
     sBoxOutput = Permutation(sBoxOutput); // Apply the permutation to the S-box output
+
+    // cout << "Feistel function output: 0x" << hex << setw(8) << setfill('0') << uppercase << sBoxOutput << endl;
+    // printBinary(sBoxOutput, 32);
     return sBoxOutput;
 }
 
@@ -72,14 +77,31 @@ uint64_t DES::encrypt(uint64_t plaintext, vector<uint64_t> roundKeys){
     // This function should take a 64-bit plaintext and a vector of round keys,
     // and return the 64-bit ciphertext after applying the initial permutation, 16 rounds of processing, and final permutation.
     // For simplicity, this is a placeholder implementation. You will need to implement the actual logic.
+    cout << "Initial plaintext: 0x" << hex << setw(16) << setfill('0') << uppercase << plaintext << endl;
+    printBinary(plaintext, 64);
 
     uint64_t permutedText = initialPermutation(plaintext);
+
+    cout << "After initial permutation: 0x" << hex << setw(16) << setfill('0') << uppercase << permutedText << endl;
+    printBinary(permutedText, 64);
+
     uint32_t leftHalf = (permutedText >> 32) & 0xFFFFFFFF; // Left 32 bits
     uint32_t rightHalf = permutedText & 0xFFFFFFFF; // Right 32 bits
+
+    cout << "Initial Left Half: 0x" << hex << setw(8) << setfill('0') << uppercase << leftHalf 
+         << " | Initial Right Half: 0x" << hex << setw(8) << setfill('0') << uppercase << rightHalf << endl;
+        printBinary(leftHalf, 32);
+        printBinary(rightHalf, 32);
+    
     for (size_t i = 0;i < roundKeys.size();i++){
         uint32_t temp = rightHalf;
         rightHalf = leftHalf ^ feistelFunction(rightHalf, roundKeys[i]);
         leftHalf = temp;
+
+        cout << "After Round " << (i + 1) << ": Left Half: 0x" << hex << setw(8) << setfill('0') << uppercase << leftHalf 
+             << " | Right Half: 0x" << hex << setw(8) << setfill('0') << uppercase << rightHalf << endl;
+        printBinary(leftHalf, 32);
+        printBinary(rightHalf, 32); 
     }
     swap(leftHalf, rightHalf); // Swap halves after the final round
     uint64_t result = ((uint64_t)leftHalf << 32) | rightHalf;
