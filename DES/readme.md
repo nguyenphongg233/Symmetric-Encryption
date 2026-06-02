@@ -1,0 +1,1 @@
+g++ main.cpp des.cpp keyschedule.cpp Des_table.cpp -o test
