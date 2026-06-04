@@ -1,11 +1,8 @@
 #include "AES/AES.h"
 #include "DES/DES.h"
 #include "DES/KeySchedule.h"
-#include <iostream>
-#include <string>
-#include <vector>
-#include <cstdint>
-#include <iomanip>
+#include "RSA/RSA.h"
+#include <bits/stdc++.h>
 
 using namespace std;
 
@@ -176,5 +173,19 @@ int main() {
   string aes_decryptedText = aesBlocksToString(aes_decryptedBlocks);
   cout << "AES Recovered text: " << aes_decryptedText << "\n";
 
+  // ------------------------- RSA -------------------------
+  cout << "============= TEST RSA =============\n";
+  //RSA rsa(7,17, 5);
+  RSA rsa;
+  uint64_t message = 19; // Ví dụ message 128-bit
+  cout << "Original message: " << message << "\n";
+
+  uint64_t encryptedMessage = rsa.encrypt(message);
+  cout << "Encrypted message: " << encryptedMessage << "\n";
+
+  uint64_t decryptedMessage = rsa.decrypt(encryptedMessage);
+  cout << "Decrypted message: " << decryptedMessage << "\n";
+
+  
   return 0;
 }
